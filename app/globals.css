@@ -1,26 +1,31 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+input,
+textarea {
+  border-radius: theme("borderRadius.md");
+  border-color: theme("colors.gray.400");
+  padding: theme("spacing.0") theme("spacing.3");
+  border-width: theme("borderWidth.2");
+  margin-bottom: theme("spacing.2");
+  width: theme("width.full");
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Вы также можете стилизовать состояния */
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: theme("colors.blue.900");
+  box-shadow: 0 0 0 2px theme("colors.blue.400");
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+label {
+  color: theme("colors.blue.900");
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.btn-primary {
+  background-color: theme("colors.blue.900");
+  color: white;
+  padding: theme("spacing.1") theme("spacing.4");
+  border-radius: theme("borderRadius.md");
+  align-self: flex-start;
 }
