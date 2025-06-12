@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import ConfirmDelete from "../features/ConfirmDelete";
+
 export default function Product({ product }: { product: ProductType }) {
   return (
     <tr>
@@ -26,6 +28,7 @@ export default function Product({ product }: { product: ProductType }) {
           </svg>
           Edit
         </Link>
+        <ConfirmDelete id={product._id} name={product.title} />
       </td>
     </tr>
   );

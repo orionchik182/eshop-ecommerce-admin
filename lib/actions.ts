@@ -45,3 +45,16 @@ export async function updateProduct(formData: FormData) {
   revalidatePath("/products");
   redirect("/products");
 }
+export async function deleteProduct(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  const id = formData.get("id")?.toString();
+  if (!id) throw new Error("Product ID missing");
+
+  await connectMongo();
+  await Product.findByIdAndDelete(id);
+
+  revalidatePath("/products"); // сбросим кеш списка
+  redirect("/products"); // вернём пользователя на список
+}

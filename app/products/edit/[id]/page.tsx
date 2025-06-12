@@ -1,4 +1,4 @@
-import ProductForm from "@/components/features/ProductForm";
+import ProductForm from "@/components/layout/ProductForm";
 import Layout from "@/components/layout/Layout";
 
 import { getProductById } from "@/lib/data-service";
