@@ -1,10 +1,26 @@
-import type { NextConfig } from "next";
+// next.config.ts
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   images: {
-    domains: ["lh3.googleusercontent.com"],
+    /** разрешаем любые пути на указанных хостах */
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**", // двойная *  → любой путь/файл
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "eshop-ecommerce.s3.eu-north-1.amazonaws.com",
+        pathname: "/**", // любые пути и файлы
+      },
+    ],
   },
-  /* config options here */
 };
 
 export default nextConfig;

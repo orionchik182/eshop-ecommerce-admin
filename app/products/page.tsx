@@ -7,10 +7,7 @@ export default async function Page() {
   const products = await getProducts();
   return (
     <Layout>
-      <Link
-        href={"products/new"}
-        className="btn-primary"
-      >
+      <Link href={"products/new"} className="btn-primary">
         Add new product
       </Link>
       <table className="mt-2">
@@ -22,7 +19,10 @@ export default async function Page() {
         </thead>
         <tbody>
           {products.map((product) => (
-            <Product product={product} key={product._id} />
+            <Product
+              product={{ ...product, _id: product._id.toString() }}
+              key={product._id.toString()}
+            />
           ))}
         </tbody>
       </table>

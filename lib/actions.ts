@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth"; // если нужна авторизация
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { deleteFile, uploadFile } from "./s3";
+
 export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
@@ -13,9 +15,17 @@ export async function createProduct(formData: FormData) {
   const title = formData.get("title")?.toString() || "";
   const description = formData.get("description")?.toString() || "";
   const price = Number(formData.get("price") || 0);
+  const files = formData.getAll("images") as File[];
+
+  const imageUrls: string[] = [];
+  for (const file of files) {
+    if (!file || typeof file === "string") continue;
+    const url = await uploadFile(file); // 👈 AWS S3
+    imageUrls.push(url);
+  }
 
   await connectMongo();
-  await Product.create({ title, description, price });
+  await Product.create({ title, description, price, images: imageUrls });
 
   revalidatePath("/products");
   redirect("/products");
@@ -52,9 +62,21 @@ export async function deleteProduct(formData: FormData) {
   const id = formData.get("id")?.toString();
   if (!id) throw new Error("Product ID missing");
 
+  /* 1. Подключаемся и находим товар */
   await connectMongo();
-  await Product.findByIdAndDelete(id);
+  const product = await Product.findById(id);
+  if (!product) throw new Error("Product not found");
 
-  revalidatePath("/products"); // сбросим кеш списка
-  redirect("/products"); // вернём пользователя на список
+  /* 2. удаляем файлы из S3 */
+  for (const url of product.images ?? []) {
+    const key = url.split("/").pop()!; // "uuid-filename.jpg"
+    await deleteFile(key);
+  }
+
+  /* 3. Удаляем документ */
+  await product.deleteOne();
+
+  /* 4. Инвалидация списка + редирект */
+  revalidatePath("/products");
+  return { ok: true };
 }

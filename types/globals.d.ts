@@ -8,6 +8,7 @@ interface GlobalCache {
 interface ProductType {
   _id: string;
   title: string;
+  images: string[];
   description?: string;
   price: number;
 }

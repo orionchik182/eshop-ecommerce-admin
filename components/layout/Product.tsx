@@ -1,12 +1,24 @@
 import Link from "next/link";
 
 import ConfirmDelete from "../features/ConfirmDelete";
+import Image from "next/image";
 
 export default function Product({ product }: { product: ProductType }) {
   return (
     <tr>
       <td className="border border-blue-200 p-1">{product.title}</td>
       <td className="border border-blue-200 p-1">{product.price}</td>
+      <td className="border border-blue-200 p-1">
+        {product.images?.map((image, i) => (
+          <Image
+            src={image}
+            key={i}
+            width={40}
+            height={40}
+            alt={product.title}
+          />
+        ))}
+      </td>
       <td className="border border-blue-200 p-1">
         <Link
           href={`/products/edit/${product._id}`}

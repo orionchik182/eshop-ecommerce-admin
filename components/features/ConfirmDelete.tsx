@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { deleteProduct } from "@/lib/actions";
 import Modal from "@/components/ui/Modal";
+import { useRouter } from "next/navigation";
 
 export default function ConfirmDelete({
   id,
@@ -13,10 +14,13 @@ export default function ConfirmDelete({
 }) {
   const [open, setOpen] = useState(false);
 
+  const router = useRouter();
+
   async function handleDelete() {
     const fd = new FormData();
     fd.set("id", id);
     await deleteProduct(fd); // server action
+    router.refresh();
   }
 
   return (
@@ -46,13 +50,13 @@ export default function ConfirmDelete({
       {/* Собственно модалка */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <h3 className="mb-4 text-lg font-semibold">
-          Do you really want to delete <b>{name}</b>?
+          Do you really want to delete &rdquo;{name}&rdquo;?
         </h3>
 
         <div className="flex justify-end gap-3">
           <button
             onClick={() => setOpen(false)}
-            className="rounded-md border px-3 py-1"
+            className="rounded-md border bg-gray-300 px-3 py-1"
           >
             No
           </button>
