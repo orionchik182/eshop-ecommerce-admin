@@ -1,7 +1,17 @@
 "use client";
 
 import { createProduct, updateProduct } from "@/lib/actions";
+
 import { useEffect, useRef, useState } from "react";
+import ImagePreview from "./ImagePreview";
+import SubmitButton from "./SubmitButton";
+import { ReactSortable } from "react-sortablejs";
+
+// Функция для инициализации состояния
+const getInitialItems = (product: ProductType | null): SortableImageItem[] => {
+  if (!product?.images) return [];
+  return product.images.map((url) => ({ id: url, source: url }));
+};
 
 export default function ProductForm({
   product,
@@ -10,52 +20,47 @@ export default function ProductForm({
 }) {
   const action = product ? updateProduct : createProduct;
   const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [keptImages, setKeptImages] = useState<string[]>(product?.images ?? []);
-  const [newFiles, setNewFiles] = useState<{ file: File; preview: string }[]>(
-    [],
+  const [items, setItems] = useState<SortableImageItem[]>(() =>
+    getInitialItems(product ?? null),
   );
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const keptImages = items
+    .map((item) => item.source)
+    .filter((source): source is string => typeof source === "string");
 
   useEffect(() => {
     const dataTransfer = new DataTransfer();
-    newFiles.forEach((item) => dataTransfer.items.add(item.file));
+    items.forEach((item) => {
+      if (item.source instanceof File) {
+        dataTransfer.items.add(item.source);
+      }
+    });
     if (inputRef.current) {
       inputRef.current.files = dataTransfer.files;
     }
-  }, [newFiles]);
-
-  useEffect(() => {
-    const previews = newFiles.map((item) => item.preview);
-    return () => {
-      previews.forEach((preview) => URL.revokeObjectURL(preview));
-    };
-  }, [newFiles]);
+  }, [items]);
 
   function handleSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 
-    const newItems = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
+    const newItems: SortableImageItem[] = files.map((file) => ({
+      // Генерируем уникальный ID для новых файлов
+      id: `file-${file.name}-${Math.random()}`,
+      source: file,
     }));
 
-    setNewFiles((prev) => [...prev, ...newItems]);
-    // Сбрасываем значение инпута, чтобы можно было выбрать те же файлы снова
     e.target.value = "";
+    setItems((prev) => [...prev, ...newItems]);
   }
 
-  function handleRemoveNewFile(previewUrl: string) {
-    setNewFiles((prev) => prev.filter((item) => item.preview !== previewUrl));
+  function handleRemove(idToRemove: string) {
+    setItems((prev) => prev.filter((item) => item.id !== idToRemove));
   }
 
-  function handleRemoveKeptImage(url: string) {
-    setKeptImages((prev) => prev.filter((u) => u !== url));
-  }
 
-  const allPreviews = [...keptImages, ...newFiles.map((item) => item.preview)];
 
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4">
@@ -83,29 +88,16 @@ export default function ProductForm({
       {/* ── Фото ── */}
       <label>Photos</label>
       <div className="flex flex-wrap gap-2">
-        {allPreviews.map((url) => (
-          <div key={url} className="relative h-24 w-24">
-            <img
-              src={url}
-              className="h-full w-full rounded object-cover"
-              alt="Preview"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                // Определяем, какой обработчик вызывать
-                if (url.startsWith("blob:")) {
-                  handleRemoveNewFile(url);
-                } else {
-                  handleRemoveKeptImage(url);
-                }
-              }}
-              className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
+        <ReactSortable
+          list={items}
+          setList={setItems
+          }
+          className="flex flex-wrap gap-1"
+        >
+          {items.map((item) => (
+            <ImagePreview key={item.id} source={item.source} onRemove={()=> handleRemove(item.id)} />
+          ))}
+        </ReactSortable>
 
         {/* Кнопка Upload  */}
         <label className="flex h-24 w-24 cursor-pointer items-center justify-center rounded bg-gray-200 text-sm text-gray-600">
@@ -156,9 +148,7 @@ export default function ProductForm({
         defaultValue={product?.price ?? ""}
       />
 
-      <button type="submit" className="btn-primary self-start">
-        Save
-      </button>
+      <SubmitButton />
     </form>
   );
 }
