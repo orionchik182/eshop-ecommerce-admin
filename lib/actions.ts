@@ -27,7 +27,13 @@ export async function createProduct(formData: FormData) {
   }
 
   await connectMongo();
-  await Product.create({ title, description, category, price, images: imageUrls });
+  await Product.create({
+    title,
+    description,
+    category,
+    price,
+    images: imageUrls,
+  });
 
   revalidatePath("/products");
   redirect("/products");
@@ -118,6 +124,31 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   revalidatePath("/products");
 }
 
+function parseProperties(formData: FormData) {
+  // { "0": {name:"Color", value:"Red"}, "1": {...} }
+  const map: Record<string, { name?: string; value?: string[] }> = {};
+
+  for (const [key, value] of formData.entries()) {
+    const m = key.match(/^properties\[(\d+)\]\.(name|value)$/);
+    if (!m) continue;
+    const [, idx, field] = m;
+    map[idx] ??= {};
+    
+    if (field === "name") {
+      map[idx].name = value.toString().trim();
+    } else {
+      // split по запятой, trim, убираем пустые элементы
+      map[idx].value = value
+        .toString()
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return Object.values(map).filter((p) => p.name && p.value?.length); // без name игнорируем
+}
+
 export async function createCategory(formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
@@ -130,10 +161,13 @@ export async function createCategory(formData: FormData) {
     parentCategory = null;
   }
 
+  const properties = parseProperties(formData);
+
   await connectMongo();
-  await Category.create({ name, parent: parentCategory });
+  await Category.create({ name, parent: parentCategory, properties });
 
   revalidatePath("/categories");
+  redirect("/categories");
 }
 
 export async function deleteCategory(formData: FormData): Promise<void> {
@@ -165,6 +199,7 @@ export async function updateCategory(formData: FormData) {
 
   const name = formData.get("name")?.toString() ?? "";
   const parentCategory = formData.get("parentCategory")?.toString() ?? "";
+  const properties = parseProperties(formData);
 
   await connectMongo();
   const category = await Category.findById(id);
@@ -173,7 +208,7 @@ export async function updateCategory(formData: FormData) {
   /** 2. Обновляем документ в БД */
   await Category.findByIdAndUpdate(
     id,
-    { name, parentCategory },
+    { name, parentCategory, properties },
     { new: true, runValidators: true },
   );
 

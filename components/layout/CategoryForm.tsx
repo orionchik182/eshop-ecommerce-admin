@@ -1,3 +1,6 @@
+import Link from "next/link";
+import AddPropertyButton from "../ui/AddPropertyButton";
+
 export default function CategoryForm({
   action,
   categories,
@@ -14,7 +17,11 @@ export default function CategoryForm({
       <label htmlFor="name">{category ? "Edit" : "New"} category name</label>
       <div className="flex flex-col gap-1">
         <div className="flex gap-1">
-          <input type="hidden" name="id" value={category?._id.toString()} />
+          <input
+            type="hidden"
+            name="id"
+            value={category?._id.toString() ?? ""}
+          />
 
           <input
             className="!mb-0"
@@ -22,12 +29,12 @@ export default function CategoryForm({
             placeholder="Category name"
             id="name"
             name="name"
-            defaultValue={category?.name}
+            defaultValue={category?.name || ""}
           />
           <select
             name="parentCategory"
             className="!mb-0"
-            defaultValue={parentId}
+            defaultValue={parentId || ""}
           >
             <option value="">No parent category</option>
             {categories.length > 0 &&
@@ -45,9 +52,14 @@ export default function CategoryForm({
         </div>
         <div className="mb-2">
           <label className="block">Properties</label>
-          <button className="btn-default text-sm">Add new property</button>
+          <AddPropertyButton initial={category?.properties ?? []} />
         </div>
       </div>
+      {category && (
+        <Link href={"/categories"} className="btn-default mr-2">
+          Cancel
+        </Link>
+      )}
       <button className="btn-primary py-1">Save</button>
     </form>
   );

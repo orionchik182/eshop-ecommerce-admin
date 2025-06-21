@@ -9,6 +9,8 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+
+
 interface ProductType {
   _id: string;
   title: string;
@@ -18,10 +20,15 @@ interface ProductType {
   price: number;
 }
 
+type Property = { name: string; value: string[] };
+
+type AddPropertyButtonProps = { initial?: Property[] };
+
 type CategoryType = {
   _id: string;
   name: string;
   parent: { _id: string; name: string } | null;
+  properties: Property[];
   createdAt: string;
   updatedAt: string;
 };
