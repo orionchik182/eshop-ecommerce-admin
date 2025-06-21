@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 input,
-textarea {
+textarea,
+select {
   border-radius: theme("borderRadius.md");
   border-color: theme("colors.gray.400");
   padding: theme("spacing.0") theme("spacing.3");
@@ -12,7 +13,8 @@ textarea {
 
 /* Вы также можете стилизовать состояния */
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   border-color: theme("colors.blue.900");
   box-shadow: 0 0 0 2px theme("colors.blue.400");
@@ -28,4 +30,20 @@ label {
   padding: theme("spacing.1") theme("spacing.4");
   border-radius: theme("borderRadius.md");
   align-self: flex-start;
+}
+
+.btn-default {
+  background-color: theme("colors.gray.500");
+  color: white;
+}
+
+.btn-red {
+  background-color: theme("colors.red.800");
+  color: white;
+}
+
+.btn-default,
+.btn-red {
+  padding: theme("spacing.1") theme("spacing.4");
+  border-radius: theme("borderRadius.md");
 }

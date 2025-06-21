@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { deleteFile, uploadFile } from "./s3";
+import Category from "./models/Category";
 
 export async function createProduct(formData: FormData) {
   const session = await auth();
@@ -14,6 +15,7 @@ export async function createProduct(formData: FormData) {
 
   const title = formData.get("title")?.toString() || "";
   const description = formData.get("description")?.toString() || "";
+  const category = formData.get("category")?.toString() || "";
   const price = Number(formData.get("price") || 0);
   const files = formData.getAll("images") as File[];
 
@@ -25,7 +27,7 @@ export async function createProduct(formData: FormData) {
   }
 
   await connectMongo();
-  await Product.create({ title, description, price, images: imageUrls });
+  await Product.create({ title, description, category, price, images: imageUrls });
 
   revalidatePath("/products");
   redirect("/products");
@@ -42,6 +44,7 @@ export async function updateProduct(formData: FormData) {
   const title = formData.get("title")?.toString() ?? "";
   const description = formData.get("description")?.toString() ?? "";
   const price = Number(formData.get("price") ?? 0);
+  const category = formData.get("category")?.toString() ?? "";
 
   // Новые файлы для загрузки
   const newImageFiles = formData.getAll("images") as File[];
@@ -81,7 +84,7 @@ export async function updateProduct(formData: FormData) {
   /** 3. Обновляем документ в БД */
   await Product.findByIdAndUpdate(
     id,
-    { title, description, price, images: finalImageUrls },
+    { title, description, price, category, images: finalImageUrls },
     { new: true, runValidators: true },
   );
 
@@ -90,7 +93,7 @@ export async function updateProduct(formData: FormData) {
   redirect("/products");
 }
 
-export async function deleteProduct(formData: FormData) {
+export async function deleteProduct(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
@@ -113,5 +116,68 @@ export async function deleteProduct(formData: FormData) {
 
   /* 4. Инвалидация списка + редирект */
   revalidatePath("/products");
-  return { ok: true };
+}
+
+export async function createCategory(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  const name = formData.get("name")?.toString() || "";
+  let parentCategory: string | null =
+    formData.get("parentCategory")?.toString() || "";
+
+  if (parentCategory === "") {
+    parentCategory = null;
+  }
+
+  await connectMongo();
+  await Category.create({ name, parent: parentCategory });
+
+  revalidatePath("/categories");
+}
+
+export async function deleteCategory(formData: FormData): Promise<void> {
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  const id = formData.get("id")?.toString();
+  if (!id) throw new Error("Category ID missing");
+
+  /* 1. Подключаемся и находим товар */
+  await connectMongo();
+  const category = await Category.findById(id);
+  if (!category) throw new Error("Category not found");
+
+  /* 3. Удаляем документ */
+  await category.deleteOne();
+
+  /* 4. Инвалидация списка + редирект */
+  revalidatePath("/category");
+}
+
+export async function updateCategory(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  /** 1. Значения из формы */
+  const id = formData.get("id")?.toString();
+  if (!id) throw new Error("Category ID missing");
+
+  const name = formData.get("name")?.toString() ?? "";
+  const parentCategory = formData.get("parentCategory")?.toString() ?? "";
+
+  await connectMongo();
+  const category = await Category.findById(id);
+  if (!category) throw new Error("Category not found");
+
+  /** 2. Обновляем документ в БД */
+  await Category.findByIdAndUpdate(
+    id,
+    { name, parentCategory },
+    { new: true, runValidators: true },
+  );
+
+  /** 3. Инвалидация и редирект */
+  revalidatePath("/categories");
+  redirect("/categories");
 }

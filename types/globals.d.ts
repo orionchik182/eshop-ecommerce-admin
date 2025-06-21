@@ -5,12 +5,31 @@ interface GlobalCache {
   };
 }
 
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
 interface ProductType {
   _id: string;
   title: string;
   images: string[];
   description?: string;
+  category: string;
   price: number;
+}
+
+type CategoryType = {
+  _id: string;
+  name: string;
+  parent: { _id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+interface CategoryFormType {
+  action: (formData: FormData) => Promise<void>;
+  categories: CategoryType[];
+  category?: CategoryType | null;
 }
 
 type ImagePreviewProps = {
@@ -24,3 +43,5 @@ type SortableImageItem = {
 };
 
 type NewFileItem = { file: File; preview: string };
+
+type DeleteAction = (formData: FormData) => Promise<void>;

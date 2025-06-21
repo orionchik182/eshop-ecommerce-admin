@@ -15,8 +15,10 @@ const getInitialItems = (product: ProductType | null): SortableImageItem[] => {
 
 export default function ProductForm({
   product,
+  categories,
 }: {
   product?: ProductType | null;
+  categories: CategoryType[];
 }) {
   const action = product ? updateProduct : createProduct;
   const formRef = useRef<HTMLFormElement>(null);
@@ -60,12 +62,12 @@ export default function ProductForm({
     setItems((prev) => prev.filter((item) => item.id !== idToRemove));
   }
 
-
-
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4">
       {/* hidden поля для update */}
-      {product && <input type="hidden" name="id" value={product._id} />}
+      {product && (
+        <input type="hidden" name="id" value={product._id.toString()} />
+      )}
 
       {keptImages.map((url) => (
         <input key={url} type="hidden" name="keptImages" value={url} />
@@ -85,17 +87,31 @@ export default function ProductForm({
         defaultValue={product?.title ?? ""}
       />
 
+      {/* ── Категория ── */}
+      <label>Category</label>
+      <select name="category" defaultValue={product?.category ?? ""}>
+        <option value="">Uncategorized</option>
+        {categories?.length > 0 &&
+          categories.map((c) => (
+            <option value={c._id.toString()} key={c._id.toString()}>
+              {c.name}
+            </option>
+          ))}
+      </select>
       {/* ── Фото ── */}
       <label>Photos</label>
       <div className="flex flex-wrap gap-2">
         <ReactSortable
           list={items}
-          setList={setItems
-          }
+          setList={setItems}
           className="flex flex-wrap gap-1"
         >
           {items.map((item) => (
-            <ImagePreview key={item.id} source={item.source} onRemove={()=> handleRemove(item.id)} />
+            <ImagePreview
+              key={item.id}
+              source={item.source}
+              onRemove={() => handleRemove(item.id)}
+            />
           ))}
         </ReactSortable>
 

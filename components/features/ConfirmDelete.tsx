@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { deleteProduct } from "@/lib/actions";
+
 import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 
 export default function ConfirmDelete({
   id,
   name,
+  deleteAction,
 }: {
   id: string;
   name: string;
+  deleteAction: DeleteAction,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -19,7 +21,7 @@ export default function ConfirmDelete({
   async function handleDelete() {
     const fd = new FormData();
     fd.set("id", id);
-    await deleteProduct(fd); // server action
+    await deleteAction(fd); // server action
     router.refresh();
   }
 
