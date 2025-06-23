@@ -27,6 +27,11 @@ export default function ProductForm({
   const [items, setItems] = useState<SortableImageItem[]>(() =>
     getInitialItems(product ?? null),
   );
+  const [selectedCatId, setSelectedCatId] = useState<string>(
+    product?.category ?? "",
+  );
+
+  const currentCategory = categories.find((c) => c._id === selectedCatId);
 
   const keptImages = items
     .map((item) => item.source)
@@ -89,7 +94,11 @@ export default function ProductForm({
 
       {/* ── Категория ── */}
       <label>Category</label>
-      <select name="category" defaultValue={product?.category ?? ""}>
+      <select
+        name="category"
+        onChange={(e) => setSelectedCatId(e.target.value)}
+        defaultValue={selectedCatId}
+      >
         <option value="">Uncategorized</option>
         {categories?.length > 0 &&
           categories.map((c) => (
@@ -98,6 +107,31 @@ export default function ProductForm({
             </option>
           ))}
       </select>
+      {/* ── Свойства ── */}
+      {currentCategory && currentCategory.properties.length > 0 && (
+        <>
+          <label className="mt-2">Properties</label>
+
+          {currentCategory.properties.map((prop, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <span className="w-32">{prop.name}</span>
+
+              <select
+                name={`props[${prop.name}]`}
+                defaultValue={product?.props?.[prop.name] ?? ""}
+                className="flex-1"
+              >
+                <option value="">– choose –</option>
+                {prop.value.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </>
+      )}
       {/* ── Фото ── */}
       <label>Photos</label>
       <div className="flex flex-wrap gap-2">

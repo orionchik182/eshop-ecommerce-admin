@@ -13,6 +13,8 @@ export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
+  const props = parseProps(formData);
+
   const title = formData.get("title")?.toString() || "";
   const description = formData.get("description")?.toString() || "";
   const category = formData.get("category")?.toString() || "";
@@ -33,6 +35,7 @@ export async function createProduct(formData: FormData) {
     category,
     price,
     images: imageUrls,
+    props
   });
 
   revalidatePath("/products");
@@ -46,6 +49,8 @@ export async function updateProduct(formData: FormData) {
   /** 1. Значения из формы */
   const id = formData.get("id")?.toString();
   if (!id) throw new Error("Product ID missing");
+
+  const props = parseProps(formData); 
 
   const title = formData.get("title")?.toString() ?? "";
   const description = formData.get("description")?.toString() ?? "";
@@ -90,7 +95,7 @@ export async function updateProduct(formData: FormData) {
   /** 3. Обновляем документ в БД */
   await Product.findByIdAndUpdate(
     id,
-    { title, description, price, category, images: finalImageUrls },
+    { title, description, price, category, images: finalImageUrls, props },
     { new: true, runValidators: true },
   );
 
@@ -122,6 +127,19 @@ export async function deleteProduct(formData: FormData): Promise<void> {
 
   /* 4. Инвалидация списка + редирект */
   revalidatePath("/products");
+}
+
+function parseProps(formData: FormData) {
+  const obj: Record<string, string> = {};
+
+  for (const [key, value] of formData.entries()) {
+    const m = key.match(/^props\[(.+)]$/);   // props[Color] → Color
+    if (!m) continue;
+    const name = m[1];
+    const val  = value.toString().trim();
+    if (val) obj[name] = val;
+  }
+  return obj;        // { Color: "red", Size: "XL" }
 }
 
 function parseProperties(formData: FormData) {

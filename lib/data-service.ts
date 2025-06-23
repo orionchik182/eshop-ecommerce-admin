@@ -14,10 +14,18 @@ export async function getProductById(id: string) {
 
 export async function getCategories() {
   await connectMongo();
-  return Category.find().populate("parent").lean<CategoryType[]>();
-}
+  const docs = (await Category.find()
+    .lean<CategoryLean>()
+    .exec()) as unknown as CategoryLean[];
 
-export async function getCategoryById(id: string) {
-  await connectMongo();
-  return Category.findById(id).lean<CategoryType>();
+  return docs.map((c) => ({
+    _id: c._id.toString(),
+    name: c.name,
+    parent: c.parent
+      ? { _id: c.parent._id.toString(), name: c.parent.name }
+      : null,
+    properties: c.properties,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }));
 }
