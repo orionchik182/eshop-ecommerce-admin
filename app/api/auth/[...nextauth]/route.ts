@@ -1,7 +1,9 @@
 import client from "@/lib/db";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import NextAuth from "next-auth";
+import NextAuth, { User } from "next-auth";
 import Google from "next-auth/providers/google"; // пример провайдера
+
+const adminEmails = ["serg.batumi2022@gmail.com"];
 
 export const authOptions = {
   adapter: MongoDBAdapter(client),
@@ -13,6 +15,11 @@ export const authOptions = {
   ],
   pages: {
     signIn: "/login",
+  },
+  callbacks: {
+    async signIn({ user }: { user: User }) {
+      return adminEmails.includes(user.email ?? "");
+    },
   },
   // …любые callbacks / pages / adapter
 };

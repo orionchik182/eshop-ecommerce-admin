@@ -13,11 +13,16 @@ export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
+  const title = formData.get("title")?.toString();
+
+  if (!title) {
+    throw new Error("Title is required.");
+  }
+
   const props = parseProps(formData);
 
-  const title = formData.get("title")?.toString() || "";
   const description = formData.get("description")?.toString() || "";
-  const category = formData.get("category")?.toString() || "";
+  const category = formData.get("category")?.toString() || null;
   const price = Number(formData.get("price") || 0);
   const files = formData.getAll("images") as File[];
 
@@ -35,7 +40,7 @@ export async function createProduct(formData: FormData) {
     category,
     price,
     images: imageUrls,
-    props
+    props,
   });
 
   revalidatePath("/products");
@@ -50,7 +55,7 @@ export async function updateProduct(formData: FormData) {
   const id = formData.get("id")?.toString();
   if (!id) throw new Error("Product ID missing");
 
-  const props = parseProps(formData); 
+  const props = parseProps(formData);
 
   const title = formData.get("title")?.toString() ?? "";
   const description = formData.get("description")?.toString() ?? "";
@@ -133,13 +138,13 @@ function parseProps(formData: FormData) {
   const obj: Record<string, string> = {};
 
   for (const [key, value] of formData.entries()) {
-    const m = key.match(/^props\[(.+)]$/);   // props[Color] → Color
+    const m = key.match(/^props\[(.+)]$/); // props[Color] → Color
     if (!m) continue;
     const name = m[1];
-    const val  = value.toString().trim();
+    const val = value.toString().trim();
     if (val) obj[name] = val;
   }
-  return obj;        // { Color: "red", Size: "XL" }
+  return obj; // { Color: "red", Size: "XL" }
 }
 
 function parseProperties(formData: FormData) {
@@ -151,7 +156,7 @@ function parseProperties(formData: FormData) {
     if (!m) continue;
     const [, idx, field] = m;
     map[idx] ??= {};
-    
+
     if (field === "name") {
       map[idx].name = value.toString().trim();
     } else {

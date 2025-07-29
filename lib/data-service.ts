@@ -1,6 +1,7 @@
 import { connectMongo } from "@/lib/mongoose";
 import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
+import Order from "./models/Order";
 
 export async function getProducts() {
   await connectMongo();
@@ -28,4 +29,14 @@ export async function getCategories() {
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   }));
+}
+
+export async function getCategoryById(id: string) {
+  await connectMongo();
+  return Category.findById(id).lean<CategoryType>();
+}
+
+export async function getOrders() {
+  await connectMongo();
+  return Order.find().lean();
 }

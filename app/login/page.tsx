@@ -1,33 +1,22 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   if (status === "loading") return <p>Loading…</p>;
+  if (status === "authenticated") return null;
 
   return (
-    <div className="flex h-screen w-screen items-center bg-blue-900">
+    <div className="flex h-screen w-screen items-center bg-gray-200">
       <div className="w-full text-center">
-        {!session ? (
-          <button
-            className="rounded-lg bg-white p-2 px-4"
-            onClick={() => signIn("google")}
-          >
-            Login with Google
-          </button>
-        ) : (
-          <>
-            <p>Welcome, {session.user?.email}</p>
-            <button
-              className="rounded-lg bg-white p-2 px-4"
-              onClick={() => signOut()}
-            >
-              Sign out
-            </button>
-          </>
-        )}
+        <button
+          className="rounded-lg bg-white p-2 px-4"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+        >
+          Login with Google
+        </button>
       </div>
     </div>
   );

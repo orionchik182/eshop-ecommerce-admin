@@ -60,3 +60,28 @@ interface CategoryLean {
   createdAt: Date;
   updatedAt: Date;
 }
+
+type LineItems = {
+  quantity: number;
+  price_data: {
+    corrency: string;
+    product_data: {
+      name: string;
+    };
+    unit_amount: number;
+  };
+};
+
+interface OrderType {
+  line_items: LineItems[];
+  _id: Types.ObjectId;
+  name: string;
+  email: string;
+  city: string;
+  postalCode: string;
+  streetAddress: string;
+  country: string;
+  paid: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

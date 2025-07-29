@@ -13,6 +13,24 @@ const getInitialItems = (product: ProductType | null): SortableImageItem[] => {
   return product.images.map((url) => ({ id: url, source: url }));
 };
 
+function findCategoryWithProps(
+  id: string,
+  all: CategoryType[],
+): CategoryType | null {
+  // начальная категория или null, если id неверный
+  let cat: CategoryType | null = all.find((c) => c._id === id) ?? null;
+
+  while (cat) {
+    if (cat.properties?.length) return cat; // свойства найдены
+
+    const parentId = cat.parent?._id; // может быть undefined
+    if (!parentId) break; // дошли до корня
+
+    cat = all.find((c) => c._id === parentId) ?? null;
+  }
+  return null; // ничего не нашли
+}
+
 export default function ProductForm({
   product,
   categories,
@@ -31,7 +49,9 @@ export default function ProductForm({
     product?.category ?? "",
   );
 
-  const currentCategory = categories.find((c) => c._id === selectedCatId);
+  const propsCategory = selectedCatId
+    ? findCategoryWithProps(selectedCatId, categories)
+    : null;
 
   const keptImages = items
     .map((item) => item.source)
@@ -88,6 +108,7 @@ export default function ProductForm({
         id="title"
         name="title"
         type="text"
+        required
         placeholder="Product name"
         defaultValue={product?.title ?? ""}
       />
@@ -108,11 +129,9 @@ export default function ProductForm({
           ))}
       </select>
       {/* ── Свойства ── */}
-      {currentCategory && currentCategory.properties.length > 0 && (
+      {propsCategory && (
         <>
-          <label className="mt-2">Properties</label>
-
-          {currentCategory.properties.map((prop, idx) => (
+          {propsCategory.properties.map((prop, idx) => (
             <div key={idx} className="flex items-center gap-2">
               <span className="w-32">{prop.name}</span>
 
