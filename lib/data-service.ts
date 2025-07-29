@@ -36,7 +36,8 @@ export async function getCategoryById(id: string) {
   return Category.findById(id).lean<CategoryType>();
 }
 
-export async function getOrders() {
+export async function getOrders(): Promise<OrderType[]> {
   await connectMongo();
-  return Order.find().lean();
+  const orders = await Order.find().lean();
+  return orders as unknown as OrderType[];
 }

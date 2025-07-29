@@ -4,7 +4,7 @@ import { getOrders } from "@/lib/data-service";
 
 export default async function Page() {
   const orders = await getOrders();
-  console.log(orders);
+  
   return (
     <Layout>
       <h1 className="text-2xl">Orders</h1>
