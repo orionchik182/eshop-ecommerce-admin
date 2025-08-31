@@ -48,7 +48,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(formData: FormData) {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   /** 1. Значения из формы */
@@ -110,7 +110,7 @@ export async function updateProduct(formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData): Promise<void> {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   const id = formData.get("id")?.toString();
@@ -173,7 +173,7 @@ function parseProperties(formData: FormData) {
 }
 
 export async function createCategory(formData: FormData) {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   const name = formData.get("name")?.toString() || "";
@@ -194,7 +194,7 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function deleteCategory(formData: FormData): Promise<void> {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   const id = formData.get("id")?.toString();
@@ -213,7 +213,7 @@ export async function deleteCategory(formData: FormData): Promise<void> {
 }
 
 export async function updateCategory(formData: FormData) {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   /** 1. Значения из формы */
