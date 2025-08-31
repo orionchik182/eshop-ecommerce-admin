@@ -2,7 +2,7 @@
 
 import { connectMongo } from "@/lib/mongoose";
 import Product from "@/lib/models/Product";
-import { auth } from "@/lib/auth"; // если нужна авторизация
+import { getAuth } from "@/lib/auth"; // если нужна авторизация
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -10,7 +10,7 @@ import { deleteFile, uploadFile } from "./s3";
 import Category from "./models/Category";
 
 export async function createProduct(formData: FormData) {
-  const session = await auth();
+  const session = await getAuth();
   if (!session) throw new Error("You must be logged in");
 
   const title = formData.get("title")?.toString();
