@@ -1,11 +1,11 @@
 import Layout from "@/components/layout/Layout";
 
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const session = await auth();
+  const session = await getAuth();
 
   if (!session) redirect("/login");
 

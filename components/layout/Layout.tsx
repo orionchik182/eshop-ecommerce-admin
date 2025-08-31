@@ -1,5 +1,5 @@
 import Nav from "@/components/layout/Nav";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import React from "react";
 
@@ -8,7 +8,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const session = await getAuth();
 
   if (!session) redirect("/login");
 
